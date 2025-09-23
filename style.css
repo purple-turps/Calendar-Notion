@@ -116,21 +116,6 @@ body {
   box-shadow: 0 0 10px rgba(142, 154, 239, 0.6);
 }
 
-/* Event details display area */
-#event-details {
-  margin-top: 1.5rem;
-  padding: 1.2rem 1.5rem;
-  background: #a0d9ef;
-  border-radius: var(--rounded);
-  box-shadow: var(--shadow);
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--text-dark);
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 /* Optional: style for weekday header cells (no pointer, no shadow) */
 .day-cell[style*="cursor:default"] {
   cursor: default !important;
