@@ -1,0 +1,140 @@
+:root {
+  --accent: #09B1EC;         /* Sky blue main */
+  --accent-light: #cfecf7;   /* Light blue background */
+  --accent-hover: #a0d9ef;   /* Hover shade */
+  --text-dark: #2f2f4f;
+  --rounded: 10px;
+  --shadow: 0 4px 12px rgba(230, 244, 255, 0.8); /* pastel blue */
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: white;
+  color: var(--text-dark);
+  margin: 0;
+  padding: 1.5rem;
+}
+
+/* View toggle buttons (Day, Week, Month) */
+#calendar-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+#calendar-controls button {
+  background: var(--accent);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--rounded);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: var(--shadow);
+  transition: background 0.2s ease;
+}
+
+#calendar-controls button:hover {
+  background: var(--accent-hover);
+}
+
+/* Month header with nav buttons and label */
+#calendar-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+}
+
+#calendar-header button {
+  background: var(--accent-light);
+  color: var(--accent);
+  border: none;
+  border-radius: var(--rounded);
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: background 0.2s ease;
+}
+
+#calendar-header button:hover {
+  background: var(--accent);
+  color: white;
+}
+
+/* Calendar grid container */
+#calendar-view {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+/* Day boxes - smaller, square with aspect-ratio */
+.day-cell {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: white;
+  padding: 0.5rem;       /* smaller padding */
+  font-size: 0.9rem;     /* smaller font */
+  text-align: center;
+  border-radius: var(--rounded);
+  box-shadow: var(--shadow);
+  position: relative;
+  color: var(--text-dark);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.day-cell:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 16px rgba(142, 154, 239, 0.3);
+}
+
+/* Highlight cells with events */
+.has-event {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  cursor: pointer;
+}
+
+/* Highlight today */
+.today {
+  background: var(--accent);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(142, 154, 239, 0.6);
+}
+
+/* Event details display area */
+#event-details {
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.5rem;
+  background: #a0d9ef;
+  border-radius: var(--rounded);
+  box-shadow: var(--shadow);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-dark);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Optional: style for weekday header cells (no pointer, no shadow) */
+.day-cell[style*="cursor:default"] {
+  cursor: default !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-weight: 600;
+}
