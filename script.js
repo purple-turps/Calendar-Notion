@@ -1,28 +1,41 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const calendarId = "leahann2458@gmail.com"; // ← replace this
-  const apiKey = "AIzaSyAVW2CDU8wb-9Gal-C2lKSRFNC-NLR5PAw"; // ← replace this
+  const calendarId = "leahann2458@gmail.com"; // ← replace with your calendar ID
+  const apiKey = "AIzaSyAVW2CDU8wb-9Gal-C2lKSRFNC-NLR5PAw"; // ← replace with your API key
 
   let viewMode = "month";
   let currentDate = new Date();
 
+  // Navigation buttons (← →) — behave differently depending on view mode
   document.getElementById("prevMonthBtn").addEventListener("click", () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
+    if (viewMode === "month") {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+    } else if (viewMode === "week") {
+      currentDate.setDate(currentDate.getDate() - 7);
+    } else if (viewMode === "day") {
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
     renderView();
   });
 
   document.getElementById("nextMonthBtn").addEventListener("click", () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
+    if (viewMode === "month") {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    } else if (viewMode === "week") {
+      currentDate.setDate(currentDate.getDate() + 7);
+    } else if (viewMode === "day") {
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
     renderView();
   });
 
+  // View toggle (Day / Week / Month)
   function setView(mode) {
     viewMode = mode;
-    currentDate = new Date(); // reset to today
     renderView();
   }
-
   window.setView = setView;
 
+  // Render view based on mode
   function renderView() {
     const headerLabel = document.getElementById("monthLabel");
     const view = document.getElementById("calendar-view");
@@ -32,18 +45,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const today = new Date();
 
     if (viewMode === "day") {
-      const start = new Date(today);
-      const end = new Date(today);
+      const start = new Date(currentDate);
+      const end = new Date(currentDate);
       end.setHours(23, 59, 59);
-      headerLabel.textContent = `Today: ${today.toDateString()}`;
+      headerLabel.textContent = `Day: ${start.toDateString()}`;
       fetchAndDisplayEvents(start, end, "list");
 
     } else if (viewMode === "week") {
-      const start = new Date(today);
-      start.setDate(today.getDate() - ((today.getDay() + 6) % 7)); // Adjust for Monday-start week
+      const start = new Date(currentDate);
+      start.setDate(currentDate.getDate() - ((currentDate.getDay() + 6) % 7)); // Monday-start
       const end = new Date(start);
       end.setDate(end.getDate() + 6);
       headerLabel.textContent = `Week of ${start.toDateString()} - ${end.toDateString()}`;
@@ -51,54 +63,70 @@ document.addEventListener("DOMContentLoaded", function () {
 
     } else {
       // Month view
-      headerLabel.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+      headerLabel.textContent = `${currentDate.toLocaleString("default", { month: "long" })} ${year}`;
 
-      // Add weekday headers (Mon to Sun)
+      // Weekday headers (Mon → Sun)
       const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
       view.innerHTML = weekdays
         .map(day => `<div class="day-cell" style="font-weight:bold; background:transparent; box-shadow:none; cursor:default;">${day}</div>`)
         .join("");
 
-      let firstDay = new Date(year, month, 1).getDay(); // Sunday = 0
-      firstDay = (firstDay + 6) % 7; // Adjust to make Monday = 0, Sunday = 6
+      // First day of month (adjust to Monday-start)
+      let firstDay = new Date(year, month, 1).getDay(); // Sunday=0
+      firstDay = (firstDay + 6) % 7; // Shift to Monday=0
 
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      // Add empty cells before day 1
+      // Empty padding cells
       for (let i = 0; i < firstDay; i++) {
         const pad = document.createElement("div");
         pad.className = "day-cell empty";
-        pad.style.visibility = "hidden";
+        pad.style.opacity = "0"; // keeps grid spacing
         view.appendChild(pad);
       }
 
+      // Load events
       fetchEventsForMonth(year, month).then(events => {
         for (let day = 1; day <= daysInMonth; day++) {
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const div = document.createElement("div");
           div.className = "day-cell";
 
+          // Show event marker + click-through
           if (events[dateStr]) {
             div.classList.add("has-event");
-            div.onclick = () => showEventDetails(dateStr, events[dateStr]);
+            div.innerHTML = `<div>${day}</div><span style="font-size:0.7rem; color:var(--accent)">•</span>`;
+            div.onclick = () => {
+              viewMode = "day";
+              currentDate = new Date(year, month, day);
+              renderView();
+            };
+          } else {
+            div.innerHTML = `<div>${day}</div>`;
+            div.onclick = () => {
+              viewMode = "day";
+              currentDate = new Date(year, month, day);
+              renderView();
+            };
           }
 
-          const isToday =
+          // Highlight today
+          const today = new Date();
+          if (
             day === today.getDate() &&
             month === today.getMonth() &&
-            year === today.getFullYear();
-
-          if (isToday && viewMode === "month") {
+            year === today.getFullYear()
+          ) {
             div.classList.add("today");
           }
 
-          div.innerHTML = `<div>${day}</div>`;
           view.appendChild(div);
         }
       });
     }
   }
 
+  // Fetch events for entire month
   function fetchEventsForMonth(year, month) {
     const startDate = new Date(year, month, 1).toISOString();
     const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
@@ -117,6 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
+  // Fetch & display events (day/week list)
   function fetchAndDisplayEvents(start, end, type = "list") {
     const startISO = start.toISOString();
     const endISO = end.toISOString();
@@ -134,15 +163,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         data.items.forEach(event => {
-          const start = event.start.dateTime || event.start.date;
+          const startTime = event.start.dateTime || event.start.date;
           const div = document.createElement("div");
           div.className = "has-event";
-          div.innerHTML = `<strong>${event.summary}</strong><br><small>${new Date(start).toLocaleString()}</small>`;
+          div.innerHTML = `<strong>${event.summary}</strong><br><small>${new Date(startTime).toLocaleString()}</small>`;
           container.appendChild(div);
         });
       });
   }
 
+  // Show event details in month view
   function showEventDetails(dateStr, events) {
     const details = document.getElementById("event-details");
     if (!events || events.length === 0) {
