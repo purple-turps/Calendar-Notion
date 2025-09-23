@@ -1,47 +1,44 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const calendarId = "leahann2458@gmail.com"; // ← replace with your calendar ID
-  const apiKey = "AIzaSyAVW2CDU8wb-9Gal-C2lKSRFNC-NLR5PAw"; // ← replace with your API key
+  const calendarId = "leahann2458@gmail.com"; // ← replace this
+  const apiKey = "AIzaSyAVW2CDU8wb-9Gal-C2lKSRFNC-NLR5PAw"; // ← replace this
 
   let viewMode = "month";
   let currentDate = new Date();
 
-  // Navigation buttons (← →) — behave differently depending on view mode
-  document.getElementById("prevMonthBtn").addEventListener("click", () => {
-    if (viewMode === "month") {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-    } else if (viewMode === "week") {
-      currentDate.setDate(currentDate.getDate() - 7);
-    } else if (viewMode === "day") {
-      currentDate.setDate(currentDate.getDate() - 1);
-    }
-    renderView();
-  });
-
-  document.getElementById("nextMonthBtn").addEventListener("click", () => {
-    if (viewMode === "month") {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-    } else if (viewMode === "week") {
-      currentDate.setDate(currentDate.getDate() + 7);
-    } else if (viewMode === "day") {
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    renderView();
-  });
-
-  // View toggle (Day / Week / Month)
+  // Expose setView globally for HTML buttons
   function setView(mode) {
     viewMode = mode;
+    currentDate = new Date(); // reset to today
     renderView();
   }
   window.setView = setView;
 
-  // Render view based on mode
+  // Arrow buttons
+  document.getElementById("prevMonthBtn").addEventListener("click", () => {
+    shiftView(-1);
+    renderView();
+  });
+
+  document.getElementById("nextMonthBtn").addEventListener("click", () => {
+    shiftView(1);
+    renderView();
+  });
+
+  function shiftView(direction) {
+    if (viewMode === "day") {
+      currentDate.setDate(currentDate.getDate() + direction);
+    } else if (viewMode === "week") {
+      currentDate.setDate(currentDate.getDate() + direction * 7);
+    } else if (viewMode === "month") {
+      currentDate.setMonth(currentDate.getMonth() + direction);
+    }
+  }
+
   function renderView() {
     const headerLabel = document.getElementById("monthLabel");
     const view = document.getElementById("calendar-view");
-    const details = document.getElementById("event-details");
+
     view.innerHTML = "";
-    details.innerHTML = "";
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -50,83 +47,67 @@ document.addEventListener("DOMContentLoaded", function () {
       const start = new Date(currentDate);
       const end = new Date(currentDate);
       end.setHours(23, 59, 59);
-      headerLabel.textContent = `Day: ${start.toDateString()}`;
-      fetchAndDisplayEvents(start, end, "list");
+      headerLabel.textContent = currentDate.toDateString();
+      fetchAndDisplayEvents(start, end);
 
     } else if (viewMode === "week") {
       const start = new Date(currentDate);
-      start.setDate(currentDate.getDate() - ((currentDate.getDay() + 6) % 7)); // Monday-start
+      start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); // Monday-start
       const end = new Date(start);
       end.setDate(end.getDate() + 6);
       headerLabel.textContent = `Week of ${start.toDateString()} - ${end.toDateString()}`;
-      fetchAndDisplayEvents(start, end, "list");
+      fetchAndDisplayEvents(start, end);
 
     } else {
       // Month view
-      headerLabel.textContent = `${currentDate.toLocaleString("default", { month: "long" })} ${year}`;
+      headerLabel.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
 
-      // Weekday headers (Mon → Sun)
+      // Weekday headers (Mon–Sun)
       const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
       view.innerHTML = weekdays
         .map(day => `<div class="day-cell" style="font-weight:bold; background:transparent; box-shadow:none; cursor:default;">${day}</div>`)
         .join("");
 
-      // First day of month (adjust to Monday-start)
-      let firstDay = new Date(year, month, 1).getDay(); // Sunday=0
-      firstDay = (firstDay + 6) % 7; // Shift to Monday=0
-
+      let firstDay = new Date(year, month, 1).getDay(); // Sunday = 0
+      firstDay = (firstDay + 6) % 7; // Make Monday = 0
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      // Empty padding cells
+      // Padding before day 1
       for (let i = 0; i < firstDay; i++) {
         const pad = document.createElement("div");
         pad.className = "day-cell empty";
-        pad.style.opacity = "0"; // keeps grid spacing
+        pad.style.visibility = "hidden";
         view.appendChild(pad);
       }
 
-      // Load events
       fetchEventsForMonth(year, month).then(events => {
         for (let day = 1; day <= daysInMonth; day++) {
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const div = document.createElement("div");
           div.className = "day-cell";
 
-          // Show event marker + click-through
           if (events[dateStr]) {
             div.classList.add("has-event");
-            div.innerHTML = `<div>${day}</div><span style="font-size:0.7rem; color:var(--accent)">•</span>`;
-            div.onclick = () => {
-              viewMode = "day";
-              currentDate = new Date(year, month, day);
-              renderView();
-            };
-          } else {
-            div.innerHTML = `<div>${day}</div>`;
-            div.onclick = () => {
-              viewMode = "day";
-              currentDate = new Date(year, month, day);
-              renderView();
-            };
+            // Removed onclick since bottom details div is gone
           }
 
-          // Highlight today
           const today = new Date();
-          if (
+          const isToday =
             day === today.getDate() &&
             month === today.getMonth() &&
-            year === today.getFullYear()
-          ) {
+            year === today.getFullYear();
+
+          if (isToday && viewMode === "month") {
             div.classList.add("today");
           }
 
+          div.innerHTML = `<div>${day}</div>`;
           view.appendChild(div);
         }
       });
     }
   }
 
-  // Fetch events for entire month
   function fetchEventsForMonth(year, month) {
     const startDate = new Date(year, month, 1).toISOString();
     const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
@@ -145,8 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // Fetch & display events (day/week list)
-  function fetchAndDisplayEvents(start, end, type = "list") {
+  function fetchAndDisplayEvents(start, end) {
     const startISO = start.toISOString();
     const endISO = end.toISOString();
     const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${startISO}&timeMax=${endISO}&singleEvents=true&orderBy=startTime`;
@@ -155,32 +135,68 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(res => res.json())
       .then(data => {
         const container = document.getElementById("calendar-view");
-        container.innerHTML = "";
+        container.innerHTML = ""; // clear previous
 
         if (!data.items || data.items.length === 0) {
           container.innerHTML = "No events found.";
           return;
         }
 
-        data.items.forEach(event => {
-          const startTime = event.start.dateTime || event.start.date;
-          const div = document.createElement("div");
-          div.className = "has-event";
-          div.innerHTML = `<strong>${event.summary}</strong><br><small>${new Date(startTime).toLocaleString()}</small>`;
-          container.appendChild(div);
-        });
-      });
-  }
+        if (viewMode === "day") {
+          // Sort events by time
+          const dayEvents = data.items.sort((a, b) => {
+            const aTime = new Date(a.start.dateTime || a.start.date).getTime();
+            const bTime = new Date(b.start.dateTime || b.start.date).getTime();
+            return aTime - bTime;
+          });
 
-  // Show event details in month view
-  function showEventDetails(dateStr, events) {
-    const details = document.getElementById("event-details");
-    if (!events || events.length === 0) {
-      details.innerHTML = "No events.";
-      return;
-    }
-    details.innerHTML = `<strong>Events on ${dateStr}:</strong><br>` +
-      events.map(e => `• ${e.summary}`).join("<br>");
+          dayEvents.forEach(event => {
+            const start = event.start.dateTime || event.start.date;
+            const div = document.createElement("div");
+            div.className = "has-event";
+            div.innerHTML = `<strong>${event.summary}</strong><br><small>${new Date(start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>`;
+            container.appendChild(div);
+          });
+
+        } else if (viewMode === "week") {
+          // Group events by date
+          const eventsByDate = {};
+          data.items.forEach(event => {
+            const date = (event.start.date || event.start.dateTime).split("T")[0];
+            if (!eventsByDate[date]) eventsByDate[date] = [];
+            eventsByDate[date].push(event);
+          });
+
+          // Sort dates Mon → Sun
+          const sortedDates = Object.keys(eventsByDate).sort((a, b) => new Date(a) - new Date(b));
+
+          sortedDates.forEach(dateStr => {
+            const dayEvents = eventsByDate[dateStr];
+            const dayDiv = document.createElement("div");
+            dayDiv.style.marginBottom = "0.75rem";
+            dayDiv.innerHTML = `<strong>${new Date(dateStr).toDateString()}</strong>`;
+            dayEvents.sort((a, b) => {
+              const aTime = new Date(a.start.dateTime || a.start.date).getTime();
+              const bTime = new Date(b.start.dateTime || b.start.date).getTime();
+              return aTime - bTime;
+            }).forEach(event => {
+              const start = event.start.dateTime || event.start.date;
+              dayDiv.innerHTML += `<br>• ${event.summary} <small>${event.start.dateTime ? new Date(start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</small>`;
+            });
+            container.appendChild(dayDiv);
+          });
+
+        } else {
+          // Month view: grid events
+          data.items.forEach(event => {
+            const start = event.start.dateTime || event.start.date;
+            const div = document.createElement("div");
+            div.className = "has-event";
+            div.innerHTML = `<strong>${event.summary}</strong><br><small>${new Date(start).toLocaleString()}</small>`;
+            container.appendChild(div);
+          });
+        }
+      });
   }
 
   // Initial render
