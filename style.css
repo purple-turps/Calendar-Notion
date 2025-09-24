@@ -64,8 +64,8 @@ body {
   justify-content: center;
   align-items: center;
   background: white;
-  padding: 0.5rem;
-  font-size: 0.9rem;
+  padding: 0.3rem;
+  font-size: 0.8rem;
   border-radius: var(--rounded);
   box-shadow: var(--shadow);
   cursor: pointer;
@@ -95,11 +95,13 @@ body {
   border: none;
   border-radius: var(--rounded);
   padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   text-align: center;
   cursor: default;
   box-shadow: var(--shadow);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Day/Week schedule */
@@ -131,3 +133,5 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
