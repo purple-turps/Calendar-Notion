@@ -1,17 +1,33 @@
-<div id="calendar-controls">
-  <button id="dayBtn">Day</button>
-  <button id="weekBtn">Week</button>
-  <button id="monthBtn">Month</button>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion Calendar Widget</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-<div id="calendar-header">
-  <button id="prevBtn">←</button>
-  <span id="monthLabel"></span>
-  <button id="nextBtn">→</button>
-</div>
+  <!-- Calendar Controls -->
+  <div id="calendar-controls">
+    <button id="dayBtn">Day</button>
+    <button id="weekBtn">Week</button>
+    <button id="monthBtn">Month</button>
+  </div>
 
-<div id="calendar-view"></div>
+  <!-- Calendar Header -->
+  <div id="calendar-header">
+    <button id="prevBtn">←</button>
+    <span id="monthLabel"></span>
+    <button id="nextBtn">→</button>
+  </div>
 
-<!-- Load script at the bottom (important) -->
-<script src="calendar.js"></script>
+  <!-- Calendar View -->
+  <div id="calendar-view"></div>
+
+  <!-- JS Script -->
+  <script src="calendar.js" defer></script>
+
+</body>
+</html>
 
