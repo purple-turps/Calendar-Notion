@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const calendarId = "leahann2458@gmail.com"; // Replace with your calendar
-    const apiKey = "YOUR_API_KEY_HERE"; // Replace with your API key
+    const apiKey = "AIzaSyAVW2CDU8wb-9Gal-C2lKSRFNC-NLR5PAw"; // Replace with your API key
 
     let viewMode = "month";
     let currentDate = new Date();
