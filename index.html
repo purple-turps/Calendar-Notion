@@ -1,13 +1,17 @@
 <div id="calendar-controls">
-  <button onclick="setView('day')">Day</button>
-  <button onclick="setView('week')">Week</button>
-  <button onclick="setView('month')">Month</button>
+  <button id="dayBtn">Day</button>
+  <button id="weekBtn">Week</button>
+  <button id="monthBtn">Month</button>
 </div>
 
 <div id="calendar-header">
-  <button id="prevMonthBtn">←</button>
+  <button id="prevBtn">←</button>
   <span id="monthLabel"></span>
-  <button id="nextMonthBtn">→</button>
+  <button id="nextBtn">→</button>
 </div>
 
 <div id="calendar-view"></div>
+
+<!-- Load script at the bottom (important) -->
+<script src="calendar.js"></script>
+
